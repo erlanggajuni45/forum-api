@@ -24,6 +24,10 @@ exports.up = (pgm) => {
       type: 'BOOL',
       notNNull: true,
     },
+    comment_date: {
+      type: 'DATE',
+      notNull: true,
+    },
   });
 
   pgm.addConstraint(
