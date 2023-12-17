@@ -33,12 +33,6 @@ describe('DeleteCommentUseCase', () => {
       useCasePayload.commentId,
       useCasePayload.owner
     );
-    expect(mockCommentRepository.deleteComment).toBeCalledWith(
-      new DeleteComment({
-        threadId: useCasePayload.threadId,
-        commentId: useCasePayload.commentId,
-        owner: useCasePayload.owner,
-      })
-    );
+    expect(mockCommentRepository.deleteComment).toBeCalledWith(useCasePayload.commentId);
   });
 });

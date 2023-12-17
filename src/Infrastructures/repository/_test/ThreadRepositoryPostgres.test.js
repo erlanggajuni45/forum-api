@@ -3,6 +3,8 @@ const ThreadsTableTestHelper = require('../../../../tests/ThreadsTableTestHelper
 const UsersTableTestHelper = require('../../../../tests/UsersTableTestHelper');
 const pool = require('../../database/postgres/pool');
 const AddedThread = require('../../../Domains/threads/entities/AddedThread');
+const NotFoundError = require('../../../Commons/exceptions/NotFoundError');
+const GotThread = require('../../../Domains/threads/entities/GotThread');
 
 describe('ThreadRepositoryPostgres', () => {
   afterEach(async () => {
@@ -57,6 +59,44 @@ describe('ThreadRepositoryPostgres', () => {
           id: 'thread-123',
           title: 'sebuah thread',
           owner: 'user-123',
+        })
+      );
+    });
+  });
+
+  describe('getThreadDetail function', () => {
+    it('should throw error when thread not found', async () => {
+      // Arrange
+      const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, {});
+
+      // Action & Assert
+      await expect(threadRepositoryPostgres.getThreadDetail('thread-123')).rejects.toThrowError(
+        NotFoundError
+      );
+    });
+
+    it('should return thread detail correctly', async () => {
+      // Arrange
+      const currentDate = new Date().toISOString();
+      await UsersTableTestHelper.addUser({ id: 'user-123' });
+      await ThreadsTableTestHelper.addThread({
+        id: 'thread-123',
+        owner: 'user-123',
+        date: currentDate,
+      });
+      const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, {});
+
+      // Action
+      const threadDetail = await threadRepositoryPostgres.getThreadDetail('thread-123');
+      const expectedDate = new Date(threadDetail.date).toISOString();
+      // Assert
+      expect(threadDetail).toStrictEqual(
+        new GotThread({
+          id: 'thread-123',
+          title: 'sebuah thread',
+          body: 'sebuah body thread',
+          date: expectedDate,
+          username: 'dicoding',
         })
       );
     });

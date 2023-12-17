@@ -206,4 +206,36 @@ describe('CommentRepositoryPostgres', () => {
       expect(deletedComment).toStrictEqual({ status: 'success' });
     });
   });
+
+  describe('getCommentByThreadId function', () => {
+    it('should return comments correctly', async () => {
+      // Arrange
+      await UsersTableTestHelper.addUser({ id: 'user-123', username: 'user 123' });
+      await UsersTableTestHelper.addUser({ id: 'user-456', username: 'user 456' });
+      await UsersTableTestHelper.addUser({ id: 'user-789', username: 'user 789' });
+      await ThreadsTableTestHelper.addThread({ id: 'thread-123', owner: 'user-123' });
+      await CommentsTableTestHelper.addComment({
+        id: 'comment-123',
+        owner: 'user-456',
+        threadId: 'thread-123',
+      });
+      await CommentsTableTestHelper.addComment({
+        id: 'comment-456',
+        owner: 'user-789',
+        threadId: 'thread-123',
+      });
+
+      const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, {});
+
+      // Action
+      const comments = await commentRepositoryPostgres.getCommentByThreadId('thread-123');
+
+      // Assert
+      expect(comments).toHaveLength(2);
+      expect(comments[0]).toHaveProperty('id');
+      expect(comments[0]).toHaveProperty('username');
+      expect(comments[0]).toHaveProperty('date');
+      expect(comments[0]).toHaveProperty('content');
+    });
+  });
 });

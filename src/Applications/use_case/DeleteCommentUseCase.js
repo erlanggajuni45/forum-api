@@ -9,7 +9,7 @@ class DeleteCommentUseCase {
     const deleteComment = new DeleteComment(useCasePayload);
     await this._commentRepository.isCommentExist(deleteComment.commentId);
     await this._commentRepository.isOwnerTheComment(deleteComment.commentId, deleteComment.owner);
-    return this._commentRepository.deleteComment(deleteComment);
+    return this._commentRepository.deleteComment(deleteComment.commentId);
   }
 }
 
