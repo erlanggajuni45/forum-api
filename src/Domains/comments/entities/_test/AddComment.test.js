@@ -5,6 +5,7 @@ describe('a AddComment entities', () => {
     // Arrange
     const payload = {
       threadId: 'thread-123',
+      owner: 'user-123',
     };
 
     // Action and assert
@@ -16,6 +17,7 @@ describe('a AddComment entities', () => {
     const payload = {
       threadId: 'thread-123',
       content: 123,
+      owner: {},
     };
 
     // Action and assert
@@ -29,15 +31,17 @@ describe('a AddComment entities', () => {
     const payload = {
       threadId: 'thread-123',
       content: 'content',
+      owner: 'user-123',
     };
 
     // Action
     const addComment = new AddComment(payload);
 
-    const { threadId, content } = addComment;
+    const { threadId, content, owner } = addComment;
 
     // Assert
     expect(threadId).toEqual(payload.threadId);
     expect(content).toEqual(payload.content);
+    expect(owner).toEqual(payload.owner);
   });
 });

@@ -1,4 +1,3 @@
-const AuthenticationError = require('../../Commons/exceptions/AuthenticationError');
 const ThreadRepository = require('../../Domains/threads/ThreadRepository');
 const AddedThread = require('../../Domains/threads/entities/AddedThread');
 
