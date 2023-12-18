@@ -25,19 +25,6 @@ class CommentRepositoryPostgres extends CommentRepository {
     return new AddedComment({ ...rows[0] });
   }
 
-  async isThreadExist(threadId) {
-    const query = {
-      text: 'SELECT * FROM threads WHERE id = $1',
-      values: [threadId],
-    };
-
-    const result = await this._pool.query(query);
-
-    if (!result.rowCount) {
-      throw new NotFoundError('Thread yang dituju tidak ditemukan');
-    }
-  }
-
   async isCommentExist(commentId) {
     const query = {
       text: 'SELECT * FROM comments WHERE id = $1',
@@ -70,9 +57,8 @@ class CommentRepositoryPostgres extends CommentRepository {
       values: [true, commentId],
     };
 
-    await this._pool.query(query);
-
-    return { status: 'success' };
+    const result = await this._pool.query(query);
+    return result.rowCount;
   }
 
   async isCommentDeleted(commentId) {

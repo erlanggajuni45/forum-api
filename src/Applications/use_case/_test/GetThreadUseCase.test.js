@@ -19,7 +19,7 @@ describe('GetThreadUseCase', () => {
       username: 'username',
     });
 
-    const mockGotComment = new GotComment({
+    const mockGotCommentFirst = new GotComment({
       id: 'comment-123',
       content: 'comment 1',
       date: new Date().toISOString(),
@@ -27,18 +27,26 @@ describe('GetThreadUseCase', () => {
       is_delete: false,
     });
 
+    const mockGotCommentSecond = new GotComment({
+      id: 'comment-456',
+      content: 'comment 2',
+      date: new Date().toISOString(),
+      username: 'user-456',
+      is_delete: true,
+    });
+
     const mockThreadRepository = new ThreadRepository();
     const mockCommentRepository = new CommentRepository();
 
-    mockCommentRepository.isThreadExist = jest.fn().mockImplementation(() => Promise.resolve());
+    mockThreadRepository.isThreadExist = jest.fn().mockImplementation(() => Promise.resolve());
     mockThreadRepository.getThreadDetail = jest
       .fn()
       .mockImplementation(() => Promise.resolve(mockGotThread));
     mockCommentRepository.getCommentByThreadId = jest
       .fn()
-      .mockImplementation(() => Promise.resolve(mockGotComment));
+      .mockImplementation(() => Promise.resolve([mockGotCommentFirst, mockGotCommentSecond]));
 
-    mockGotThread.comments = [mockGotComment];
+    mockGotThread.comments = [mockGotCommentFirst, mockGotCommentSecond];
 
     // Action
     const getThreadUseCase = new GetThreadUseCase({
@@ -49,6 +57,7 @@ describe('GetThreadUseCase', () => {
 
     // Assert
     expect(getThread).toStrictEqual(mockGotThread);
+    expect(getThread.comments).toHaveLength(2);
     expect(mockThreadRepository.getThreadDetail).toBeCalledWith(useCasePayload.threadId);
     expect(mockCommentRepository.getCommentByThreadId).toBeCalledWith(useCasePayload.threadId);
   });

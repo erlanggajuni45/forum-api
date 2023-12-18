@@ -18,30 +18,6 @@ describe('CommentRepositoryPostgres', () => {
     await pool.end();
   });
 
-  describe('isThreadExist function', () => {
-    it('should throw NotFoundError when thread is not found', async () => {
-      // Arrange
-      const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, {});
-
-      // Action & Assert
-      await expect(commentRepositoryPostgres.isThreadExist('thread-123')).rejects.toThrowError(
-        NotFoundError
-      );
-    });
-
-    it('should not throw NotFoundError when thread is found', async () => {
-      // Arrange
-      await UsersTableTestHelper.addUser({ id: 'user-123' });
-      await ThreadsTableTestHelper.addThread({ id: 'thread-123', owner: 'user-123' });
-      const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, {});
-
-      // Action & Assert
-      await expect(commentRepositoryPostgres.isThreadExist('thread-123')).resolves.not.toThrowError(
-        NotFoundError
-      );
-    });
-  });
-
   describe('addComment function', () => {
     it('should persist add comment and return added comment correctly', async () => {
       // Arrange
@@ -203,7 +179,7 @@ describe('CommentRepositoryPostgres', () => {
       const deletedComment = await commentRepositoryPostgres.deleteComment('comment-123');
 
       // Assert
-      expect(deletedComment).toStrictEqual({ status: 'success' });
+      expect(deletedComment).toEqual(1);
     });
   });
 
@@ -214,15 +190,22 @@ describe('CommentRepositoryPostgres', () => {
       await UsersTableTestHelper.addUser({ id: 'user-456', username: 'user 456' });
       await UsersTableTestHelper.addUser({ id: 'user-789', username: 'user 789' });
       await ThreadsTableTestHelper.addThread({ id: 'thread-123', owner: 'user-123' });
+
+      const currentDateFirst = new Date().toISOString();
+      const currentDateSecond = new Date().toISOString();
       await CommentsTableTestHelper.addComment({
         id: 'comment-123',
         owner: 'user-456',
         threadId: 'thread-123',
+        comment_date: currentDateFirst,
+        is_delete: false,
       });
       await CommentsTableTestHelper.addComment({
         id: 'comment-456',
         owner: 'user-789',
         threadId: 'thread-123',
+        comment_date: currentDateSecond,
+        is_delete: true,
       });
 
       const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, {});
@@ -230,12 +213,18 @@ describe('CommentRepositoryPostgres', () => {
       // Action
       const comments = await commentRepositoryPostgres.getCommentByThreadId('thread-123');
 
+      const expectedDateFirst = new Date(comments[0].date).toISOString();
+      const expectedDateSecond = new Date(comments[1].date).toISOString();
       // Assert
       expect(comments).toHaveLength(2);
-      expect(comments[0]).toHaveProperty('id');
-      expect(comments[0]).toHaveProperty('username');
-      expect(comments[0]).toHaveProperty('date');
-      expect(comments[0]).toHaveProperty('content');
+      expect(comments[0].id).toEqual('comment-123');
+      expect(comments[0].username).toEqual('user 456');
+      expect(comments[0].date).toEqual(expectedDateFirst);
+      expect(comments[0].content).toEqual('sebuah comment');
+      expect(comments[1].id).toEqual('comment-456');
+      expect(comments[1].username).toEqual('user 789');
+      expect(comments[1].date).toEqual(expectedDateSecond);
+      expect(comments[1].content).toEqual('**komentar telah dihapus**');
     });
   });
 });
