@@ -57,19 +57,7 @@ class CommentRepositoryPostgres extends CommentRepository {
       values: [true, commentId],
     };
 
-    const result = await this._pool.query(query);
-    return result.rowCount;
-  }
-
-  async isCommentDeleted(commentId) {
-    const query = {
-      text: 'SELECT * FROM comments WHERE id = $1 AND is_delete = $2',
-      values: [commentId, true],
-    };
-
-    const result = await this._pool.query(query);
-
-    return result.rowCount > 0;
+    await this._pool.query(query);
   }
 
   async getCommentByThreadId(threadId) {

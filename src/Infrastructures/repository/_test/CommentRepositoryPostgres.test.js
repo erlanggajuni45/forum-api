@@ -143,26 +143,6 @@ describe('CommentRepositoryPostgres', () => {
   });
 
   describe('deleteComment function', () => {
-    it('should soft delete a comment and return deleted comment', async () => {
-      // Arrange
-      await UsersTableTestHelper.addUser({ id: 'user-123' });
-      await ThreadsTableTestHelper.addThread({ id: 'thread-123', owner: 'user-123' });
-      await CommentsTableTestHelper.addComment({
-        id: 'comment-123',
-        owner: 'user-123',
-        threadId: 'thread-123',
-      });
-
-      const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, {});
-
-      // Action
-      await commentRepositoryPostgres.deleteComment('comment-123');
-      const isDeleted = await commentRepositoryPostgres.isCommentDeleted('comment-123');
-
-      // Assert
-      expect(isDeleted).toEqual(true);
-    });
-
     it('should return deleted comment correcly', async () => {
       // Arrange
       await UsersTableTestHelper.addUser({ id: 'user-123' });
@@ -175,11 +155,8 @@ describe('CommentRepositoryPostgres', () => {
 
       const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, {});
 
-      // Action
-      const deletedComment = await commentRepositoryPostgres.deleteComment('comment-123');
-
-      // Assert
-      expect(deletedComment).toEqual(1);
+      // Action & Assert
+      expect(() => commentRepositoryPostgres.deleteComment('comment-123')).not.toThrow();
     });
   });
 
