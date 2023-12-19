@@ -155,12 +155,13 @@ describe('CommentRepositoryPostgres', () => {
 
       const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, {});
 
-      // Action & Assert
-      expect(() => commentRepositoryPostgres.deleteComment('comment-123')).not.toThrow();
+      // Action
+      await commentRepositoryPostgres.deleteComment('comment-123');
 
-      const [firstComment] = await commentRepositoryPostgres.getCommentByThreadId('thread-123');
+      const comment = await CommentsTableTestHelper.findCommentById('comment-123');
 
-      expect(firstComment.content).toEqual('**komentar telah dihapus**');
+      // Assert
+      expect(comment[0].is_delete).toEqual(true);
     });
   });
 
