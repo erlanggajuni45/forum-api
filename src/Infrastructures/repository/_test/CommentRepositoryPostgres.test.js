@@ -157,6 +157,10 @@ describe('CommentRepositoryPostgres', () => {
 
       // Action & Assert
       expect(() => commentRepositoryPostgres.deleteComment('comment-123')).not.toThrow();
+
+      const [firstComment] = await commentRepositoryPostgres.getCommentByThreadId('thread-123');
+
+      expect(firstComment.content).toEqual('**komentar telah dihapus**');
     });
   });
 

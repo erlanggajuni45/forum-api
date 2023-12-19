@@ -11,6 +11,9 @@ describe('GetThreadUseCase', () => {
       threadId: 'thread-123',
     };
 
+    const dateFirstComment = new Date().toISOString();
+    const dateSecondComment = new Date().toISOString();
+
     const mockGotThread = new GotThread({
       id: 'thread-123',
       title: 'title',
@@ -22,7 +25,7 @@ describe('GetThreadUseCase', () => {
     const mockGotCommentFirst = new GotComment({
       id: 'comment-123',
       content: 'comment 1',
-      date: new Date().toISOString(),
+      date: dateFirstComment,
       username: 'user-123',
       is_delete: false,
     });
@@ -30,7 +33,7 @@ describe('GetThreadUseCase', () => {
     const mockGotCommentSecond = new GotComment({
       id: 'comment-456',
       content: 'comment 2',
-      date: new Date().toISOString(),
+      date: dateSecondComment,
       username: 'user-456',
       is_delete: true,
     });
@@ -39,12 +42,35 @@ describe('GetThreadUseCase', () => {
     const mockCommentRepository = new CommentRepository();
 
     mockThreadRepository.isThreadExist = jest.fn().mockImplementation(() => Promise.resolve());
-    mockThreadRepository.getThreadDetail = jest
-      .fn()
-      .mockImplementation(() => Promise.resolve(mockGotThread));
-    mockCommentRepository.getCommentByThreadId = jest
-      .fn()
-      .mockImplementation(() => Promise.resolve([mockGotCommentFirst, mockGotCommentSecond]));
+    mockThreadRepository.getThreadDetail = jest.fn().mockImplementation(() =>
+      Promise.resolve(
+        new GotThread({
+          id: 'thread-123',
+          title: 'title',
+          body: 'body',
+          date: 'date',
+          username: 'username',
+        })
+      )
+    );
+    mockCommentRepository.getCommentByThreadId = jest.fn().mockImplementation(() =>
+      Promise.resolve([
+        new GotComment({
+          id: 'comment-123',
+          content: 'comment 1',
+          date: dateFirstComment,
+          username: 'user-123',
+          is_delete: false,
+        }),
+        new GotComment({
+          id: 'comment-456',
+          content: 'comment 2',
+          date: dateSecondComment,
+          username: 'user-456',
+          is_delete: true,
+        }),
+      ])
+    );
 
     mockGotThread.comments = [mockGotCommentFirst, mockGotCommentSecond];
 
@@ -58,6 +84,7 @@ describe('GetThreadUseCase', () => {
     // Assert
     expect(getThread).toStrictEqual(mockGotThread);
     expect(getThread.comments).toHaveLength(2);
+    expect(mockThreadRepository.isThreadExist).toBeCalledWith(useCasePayload.threadId);
     expect(mockThreadRepository.getThreadDetail).toBeCalledWith(useCasePayload.threadId);
     expect(mockCommentRepository.getCommentByThreadId).toBeCalledWith(useCasePayload.threadId);
   });
